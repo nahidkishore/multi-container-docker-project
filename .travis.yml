@@ -1,0 +1,20 @@
+sudo:required
+service:
+    - docker
+before_install:
+    - docker build -t nahid0002/react-test -f ./client/Dockerfile.dev ./client
+script:
+    
+    - docker run -e CI=true nahid0002/react-test npm test
+after_success:
+  - docker build -t nahid0002/multi-client ./client
+  - docker build -t nahid0002/multi-nginx ./nginx
+  - docker build -t nahid0002/multi-server ./server
+  - docker build -t nahid0002/multi-worker ./worker
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
+  - docker push nahid0002/multi-client
+  - docker push nahid0002/multi-nginx
+  - docker push nahid0002/multi-server
+  - docker push nahid0002  /multi-worker
